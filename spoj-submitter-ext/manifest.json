@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "SPOJ Submitter",
+  "version": "0.1.0",
+  "description": "Proxy submission client for SPOJ using your active browser session (BYOS model).",
+  "permissions": [
+    "cookies",
+    "storage",
+    "tabs",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://www.spoj.com/*",
+    "https://spoj.com/*",
+    "*://*.spoj.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

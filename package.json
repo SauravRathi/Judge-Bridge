@@ -1,0 +1,16 @@
+{
+  "name": "spoj-submitter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Unified Competitive Programming Platform — SPOJ Submission POC (MERN Stack)",
+  "workspaces": [
+    "server",
+    "extension"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev --workspace=server",
+    "dev:ext": "npm run dev --workspace=extension",
+    "build:ext": "npm run build --workspace=extension",
+    "install:all": "npm install"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "cp-scrapers",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web scrapers for competitive programming platforms (SPOJ, USACO, UVa)",
+  "type": "commonjs",
+  "scripts": {
+    "scrape:spoj": "node run.js spoj",
+    "scrape:uva": "node run.js uva",
+    "scrape:usaco": "node run.js usaco",
+    "learn:inject": "node learn-dom-injection/inject.js",
+    "learn:no-puppeteer": "node learn-dom-injection/serve-lab.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.7",
+    "mongoose": "^8.9.5",
+    "puppeteer": "^25.9.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  }
+}

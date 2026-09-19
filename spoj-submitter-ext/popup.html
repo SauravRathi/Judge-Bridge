@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=400" />
+  <title>SPOJ Submitter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header__brand">
+        <img src="icons/icon48.png" alt="" class="header__icon" />
+        <div>
+          <h1 class="header__title">SPOJ Submitter</h1>
+          <p class="header__subtitle">Proxy submission client</p>
+        </div>
+      </div>
+      <div id="session-indicator" class="session-badge session-badge--loading">
+        <span class="session-badge__dot"></span>
+        <span id="session-label" class="session-badge__label">Checking…</span>
+      </div>
+    </header>
+
+    <!-- Main Form -->
+    <main class="main">
+      <!-- Problem Code -->
+      <div class="field">
+        <label for="problem-code" class="field__label">Problem Code</label>
+        <input
+          type="text"
+          id="problem-code"
+          class="field__input"
+          placeholder="e.g. TEST, PRIME1"
+          spellcheck="false"
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Language -->
+      <div class="field">
+        <label for="language-select" class="field__label">Language</label>
+        <div class="field__select-wrapper">
+          <select id="language-select" class="field__select" disabled>
+            <option value="">Enter problem code first</option>
+          </select>
+          <svg class="field__select-chevron" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Source Code -->
+      <div class="field">
+        <label for="source-code" class="field__label">Source Code</label>
+        <div class="code-area">
+          <div id="line-numbers" class="code-area__lines" aria-hidden="true">1</div>
+          <textarea
+            id="source-code"
+            class="code-area__textarea"
+            placeholder="Paste your C++ code here..."
+            spellcheck="false"
+            autocomplete="off"
+            rows="14"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button id="submit-btn" class="submit-btn" disabled>
+        <svg class="submit-btn__icon" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M3.105 2.29a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25H13.5a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.085l-1.414 4.926a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.155.75.75 0 000-1.112A28.897 28.897 0 003.105 2.289z" />
+        </svg>
+        <span id="submit-btn-text">Submit Solution</span>
+        <div id="submit-spinner" class="spinner" hidden></div>
+      </button>
+    </main>
+
+    <!-- Verdict Panel -->
+    <section id="verdict-panel" class="verdict-panel" hidden>
+      <div class="verdict-panel__header">
+        <h2 class="verdict-panel__title">Verdict</h2>
+        <button id="verdict-close" class="verdict-panel__close" title="Close">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="verdict-progress">
+        <div id="verdict-progress-bar" class="verdict-progress__bar"></div>
+      </div>
+
+      <!-- Status Text -->
+      <div id="verdict-status" class="verdict-status">
+        <span id="verdict-status-icon" class="verdict-status__icon">⏳</span>
+        <span id="verdict-status-text" class="verdict-status__text">Submitting…</span>
+      </div>
+
+      <!-- Verdict Details (shown on terminal verdict) -->
+      <div id="verdict-details" class="verdict-details" hidden>
+        <div class="verdict-detail">
+          <span class="verdict-detail__label">Submission ID</span>
+          <span id="verdict-id" class="verdict-detail__value">—</span>
+        </div>
+        <div class="verdict-detail">
+          <span class="verdict-detail__label">Time</span>
+          <span id="verdict-time" class="verdict-detail__value">—</span>
+        </div>
+        <div class="verdict-detail">
+          <span class="verdict-detail__label">Memory</span>
+          <span id="verdict-mem" class="verdict-detail__value">—</span>
+        </div>
+        <div class="verdict-detail">
+          <span class="verdict-detail__label">Language</span>
+          <span id="verdict-lang" class="verdict-detail__value">—</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Error Toast -->
+    <div id="error-toast" class="toast" hidden>
+      <svg class="toast__icon" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" />
+      </svg>
+      <span id="error-toast-text"></span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

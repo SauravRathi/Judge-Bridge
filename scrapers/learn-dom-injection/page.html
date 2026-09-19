@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DOM Injection Lab — Fake Judge</title>
+    <style>
+      :root {
+        --bg: #f4f6f8;
+        --card: #fff;
+        --ink: #1a1f24;
+        --muted: #5a6570;
+        --accent: #0b6e4f;
+        --warn: #9a3412;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: radial-gradient(circle at top left, #dfe8f0, var(--bg));
+        color: var(--ink);
+        min-height: 100vh;
+        padding: 2rem;
+      }
+      main {
+        max-width: 640px;
+        margin: 0 auto;
+        background: var(--card);
+        border: 1px solid #d0d7de;
+        padding: 1.5rem 1.75rem;
+      }
+      h1 {
+        margin: 0 0 0.35rem;
+        font-size: 1.4rem;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin-bottom: 1.25rem;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin: 0.85rem 0 0.35rem;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.55rem 0.65rem;
+        border: 1px solid #c9d1d9;
+        font: inherit;
+      }
+      textarea {
+        min-height: 120px;
+        font-family: Consolas, "Courier New", monospace;
+      }
+      button {
+        margin-top: 1rem;
+        background: var(--accent);
+        color: #fff;
+        border: 0;
+        padding: 0.65rem 1.1rem;
+        font: inherit;
+        cursor: pointer;
+      }
+      #status {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #eef2f6;
+        border-left: 4px solid #8b98a5;
+        min-height: 3rem;
+      }
+      #status.ok {
+        border-left-color: var(--accent);
+        background: #e8f6ef;
+      }
+      #status.injected {
+        border-left-color: var(--warn);
+        background: #fff4ed;
+      }
+      #banner {
+        display: none;
+        margin-bottom: 1rem;
+        padding: 0.65rem 0.85rem;
+        background: #fff4ed;
+        border: 1px dashed var(--warn);
+        color: var(--warn);
+        font-weight: 600;
+      }
+      code {
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div id="banner">DOM was changed by an injected script</div>
+      <h1 id="title">Fake Judge — Submit Page</h1>
+      <p class="hint">
+        This is a local page. The Node script will open Chrome, inject JavaScript into
+        this document (like an extension's <code>executeScript</code>), fill the form,
+        and submit it. Watch this window — and optionally open DevTools (F12).
+      </p>
+
+      <form id="submit-form" action="#" method="get">
+        <label for="problem">Problem code</label>
+        <input id="problem" name="problem" value="TEST" />
+
+        <label for="lang">Language</label>
+        <select id="lang" name="lang">
+          <option value="11">C</option>
+          <option value="44" selected>C++14</option>
+          <option value="116">Python 3</option>
+        </select>
+
+        <label for="source">Source code</label>
+        <textarea id="source" name="source">// paste code here</textarea>
+
+        <input type="hidden" name="csrf" value="lab-token-001" />
+
+        <button type="submit" id="submit-btn">Submit</button>
+      </form>
+
+      <div id="status">Waiting… nothing injected yet.</div>
+    </main>
+
+    <script>
+      // Normal page behavior (no injection). The lab script will also talk to the DOM.
+      document.getElementById("submit-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const problem = document.getElementById("problem").value;
+        const lang = document.getElementById("lang").value;
+        const source = document.getElementById("source").value;
+        const status = document.getElementById("status");
+        status.className = "ok";
+        status.textContent =
+          "Form submit handled by the PAGE. problem=" +
+          problem +
+          " lang=" +
+          lang +
+          " sourceLen=" +
+          source.length;
+      });
+    </script>
+  </body>
+</html>

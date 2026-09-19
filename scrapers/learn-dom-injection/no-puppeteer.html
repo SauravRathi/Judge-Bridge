@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>No-Puppeteer Lab — Parent</title>
+    <style>
+      :root {
+        --ink: #1a1f24;
+        --muted: #5a6570;
+        --ok: #0b6e4f;
+        --bad: #9a3412;
+        --bg: #f4f6f8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        padding: 1.5rem;
+        line-height: 1.45;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid #d0d7de;
+        padding: 1.25rem 1.5rem;
+      }
+      h1 {
+        margin: 0 0 0.4rem;
+        font-size: 1.35rem;
+      }
+      p,
+      li {
+        color: var(--muted);
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin: 1rem 0;
+      }
+      button {
+        font: inherit;
+        padding: 0.55rem 0.9rem;
+        border: 1px solid #c9d1d9;
+        background: #fff;
+        cursor: pointer;
+      }
+      button.primary {
+        background: var(--ok);
+        color: #fff;
+        border-color: var(--ok);
+      }
+      button.warn {
+        background: #fff4ed;
+        border-color: #fdba8c;
+        color: var(--bad);
+      }
+      #log {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #0f172a;
+        color: #e2e8f0;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.85rem;
+        min-height: 220px;
+        white-space: pre-wrap;
+        overflow: auto;
+      }
+      .ok {
+        color: #4ade80;
+      }
+      .bad {
+        color: #fb7185;
+      }
+      .note {
+        color: #94a3b8;
+      }
+      code {
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>No Puppeteer — open a window &amp; try to touch its DOM</h1>
+      <p>
+        This page is normal browser JavaScript only (no Node, no Puppeteer).
+        Serve it over <code>http://localhost</code> (see terminal instructions), then use the buttons.
+      </p>
+      <ul>
+        <li>
+          <strong>Popup blocker:</strong> yes — <code>window.open</code> usually needs a
+          <em>user gesture</em> (button click). A timer alone often gets blocked.
+        </li>
+        <li>
+          <strong>DOM access:</strong> blocked by the <em>Same-Origin Policy</em>, not CORS.
+          CORS is about HTTP responses to <code>fetch</code>/<code>XHR</code>. Cross-window
+          <code>otherWindow.document</code> is a different rule.
+        </li>
+      </ul>
+
+      <div class="row">
+        <button class="primary" id="btn-same" type="button">
+          1. Open same-origin child + access it
+        </button>
+        <button id="btn-probe" type="button" disabled>
+          2. Probe / inject into open child
+        </button>
+        <button class="warn" id="btn-cross" type="button">
+          3. Open example.com (cross-origin) + try access
+        </button>
+        <button id="btn-clear" type="button">Clear log</button>
+      </div>
+
+      <div id="log"></div>
+    </main>
+
+    <script>
+      const logEl = document.getElementById("log");
+      const btnProbe = document.getElementById("btn-probe");
+      let childWin = null;
+      let crossWin = null;
+
+      function log(msg, kind = "") {
+        const line = document.createElement("div");
+        if (kind) line.className = kind;
+        line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logEl.appendChild(line);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      function tryAccess(win, label) {
+        if (!win || win.closed) {
+          log(`${label}: window missing or closed`, "bad");
+          return;
+        }
+
+        // Step you asked for: hold a reference and inspect what you can see.
+        log(`${label}: window object exists. closed=${win.closed}`, "ok");
+        log(`${label}: trying location.href …`, "note");
+
+        try {
+          // location.href is readable for same-origin; cross-origin often throws
+          // on deeper access (Chrome may allow limited location checks inconsistently —
+          // document is the clear fail).
+          log(`${label}: location.href = ${win.location.href}`, "ok");
+        } catch (err) {
+          log(`${label}: cannot read location.href — ${err.name}: ${err.message}`, "bad");
+        }
+
+        log(`${label}: trying document.title …`, "note");
+        try {
+          const title = win.document.title;
+          log(`${label}: document.title = "${title}"`, "ok");
+          return true;
+        } catch (err) {
+          log(`${label}: cannot read document — ${err.name}: ${err.message}`, "bad");
+          return false;
+        }
+      }
+
+      document.getElementById("btn-same").addEventListener("click", () => {
+        log("Opening same-origin child.html via window.open (user click)…", "note");
+
+        // Must be in this click handler — not after await/setTimeout — or the popup may be blocked.
+        childWin = window.open(
+          "./child.html",
+          "domLabChild",
+          "width=640,height=520,left=80,top=80"
+        );
+
+        if (!childWin) {
+          log("Popup blocked. Allow popups for this site and try again.", "bad");
+          btnProbe.disabled = true;
+          return;
+        }
+
+        log("Got a Window reference (childWin). Waiting for load…", "ok");
+        btnProbe.disabled = false;
+
+        // Access after the child finishes loading.
+        childWin.addEventListener("load", () => {
+          log("child load event fired on parent side", "ok");
+          tryAccess(childWin, "same-origin child");
+        });
+
+        // Fallback if load already happened or event doesn't fire across some browsers.
+        setTimeout(() => {
+          if (childWin && !childWin.closed) {
+            tryAccess(childWin, "same-origin child (delayed probe)");
+          }
+        }, 500);
+      });
+
+      document.getElementById("btn-probe").addEventListener("click", () => {
+        if (!tryAccess(childWin, "probe")) return;
+
+        try {
+          const doc = childWin.document;
+          let banner = doc.getElementById("from-parent");
+          if (!banner) {
+            banner = doc.createElement("div");
+            banner.id = "from-parent";
+            banner.textContent = "Injected by the PARENT window via childWin.document";
+            banner.style.cssText =
+              "margin:0 0 1rem;padding:0.65rem;background:#fff4ed;border:1px dashed #9a3412;color:#9a3412;font-weight:600;";
+            doc.body.prepend(banner);
+          }
+          doc.getElementById("status").textContent =
+            "Parent touched this DOM at " + new Date().toLocaleTimeString();
+          doc.getElementById("status").className = "injected";
+          log("Injected a banner into the child document. Look at the child window.", "ok");
+        } catch (err) {
+          log(`Inject failed — ${err.name}: ${err.message}`, "bad");
+        }
+      });
+
+      document.getElementById("btn-cross").addEventListener("click", () => {
+        log("Opening https://example.com (different origin)…", "note");
+        crossWin = window.open(
+          "https://example.com",
+          "domLabCross",
+          "width=640,height=520,left=740,top=80"
+        );
+
+        if (!crossWin) {
+          log("Popup blocked.", "bad");
+          return;
+        }
+
+        log("Got a Window reference (crossWin), but DOM access should fail.", "ok");
+
+        setTimeout(() => {
+          tryAccess(crossWin, "cross-origin example.com");
+          try {
+            crossWin.document.body; // force the classic failure
+          } catch (err) {
+            log(
+              "Expected: parent page JS cannot DOM-inject into example.com. " +
+                "An extension or Puppeteer can, because they are not bound by this page's origin.",
+              "note"
+            );
+          }
+        }, 1200);
+      });
+
+      document.getElementById("btn-clear").addEventListener("click", () => {
+        logEl.textContent = "";
+      });
+
+      log("Ready. Use button 1 first (user gesture → window.open).", "note");
+      log("Open DevTools here (F12) too if you want to inspect childWin in the Console.", "note");
+    </script>
+  </body>
+</html>

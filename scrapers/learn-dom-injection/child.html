@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>No-Puppeteer Lab — Child</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #eef6f1;
+        color: #1a1f24;
+        padding: 1.25rem;
+      }
+      main {
+        max-width: 520px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid #c5ddd0;
+        padding: 1.25rem;
+      }
+      h1 {
+        margin-top: 0;
+        font-size: 1.2rem;
+      }
+      #status {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #eef2f6;
+        border-left: 4px solid #8b98a5;
+      }
+      #status.injected {
+        border-left-color: #9a3412;
+        background: #fff4ed;
+      }
+      .muted {
+        color: #5a6570;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Child window (same origin)</h1>
+      <p class="muted">
+        Opened by the parent via <code>window.open("./child.html")</code>.
+        If the parent is also served from this host, it may read and change this DOM.
+      </p>
+      <div id="status">Child loaded. Waiting for parent to access me…</div>
+    </main>
+  </body>
+</html>

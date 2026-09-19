@@ -1,0 +1,6 @@
+node_modules/
+.env
+scrapers/.chrome-profile/
+scrapers/debug-spoj.html
+*.log
+LEARNING.md
